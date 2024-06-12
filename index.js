@@ -9,7 +9,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3001;
 
 // Middleware to parse JSON bodies
 app.use(bodyParser.json());
@@ -123,7 +122,4 @@ async function uploadToCloudStorage(file) {
   }
 }
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+module.exports = app;
