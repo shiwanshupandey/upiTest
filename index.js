@@ -34,6 +34,18 @@ const auth = new google.auth.JWT(
 // Create Google Sheets API client
 const sheets = google.sheets({ version: 'v4', auth });
 
+
+app.get('/data', async (req, res) => {
+  try {
+    const data = await getDataFromGoogleSheet();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error('Error sending data:', error);
+    res.status(500).send('Error fetching data from Google Sheets');
+  }
+});
+
+
 // Endpoint to handle form data and send to Google Sheets
 app.post('/', upload.single('file'), async (req, res) => {
   try {
