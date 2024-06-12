@@ -17,7 +17,8 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Configure multer for file uploads
-const upload = multer({ dest: 'uploads/' }); // Files will be saved to the 'uploads' directory
+const upload = multer(); // Files will be stored in memory instead of disk
+const { Readable } = require('stream');
 
 // Load Google Sheets API credentials from environment variables
 const { GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY, SPREADSHEET_ID, FOLDER_ID } = process.env;
@@ -33,17 +34,47 @@ const auth = new google.auth.JWT(
 // Create Google Sheets API client
 const sheets = google.sheets({ version: 'v4', auth });
 
+async function getDataFromGoogleSheet() {
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID, // Replace with your Google Sheets ID
+      range: 'Sheet1', // Specify the range from which you want to fetch data
+    });
 
-app.get('/data', async (req, res) => {
+    const rows = response.data.values;
+    if (rows.length === 0) {
+      console.log('No data found.');
+      return [];
+    } else {
+      const data = rows.map(row => ({
+        name: row[0],
+        mobileNumber: row[1],
+        email: row[2],
+        correspondenceAddress: row[3],
+        permanentAddress: row[4],
+        educationalDetails: row[5],
+        totalJobExperience: row[6],
+        paymentMode: row[7],
+        imageUrl: row[8],
+        birthdate: row[9]
+      }));
+      return data;
+    }
+  } catch (error) {
+    console.error('Error fetching data from Google Sheets:', error);
+    throw error;
+  }
+}
+
+app.get('/', async (req, res) => {
   try {
     const data = await getDataFromGoogleSheet();
     res.status(200).json(data);
   } catch (error) {
-    console.error('Error sending data:', error);
-    res.status(500).send('Error fetching data from Google Sheets');
+    console.error('Error fetching data:', error);
+    res.status(500).json({ error: 'Error fetching data from Google Sheets' });
   }
 });
-
 
 // Endpoint to handle form data and send to Google Sheets
 app.post('/', upload.single('file'), async (req, res) => {
@@ -55,7 +86,11 @@ app.post('/', upload.single('file'), async (req, res) => {
     console.log('Uploaded file:', file);
 
     // Upload the file to cloud storage (e.g., Google Drive) and obtain the URL
-    const imageUrl = await uploadToCloudStorage(file);
+    const imageUrl = await uploadToCloudStorage(
+      file.buffer, // Pass file buffer directly
+      file.originalname,
+      file.mimetype
+    );
 
     // Prepare the data to be inserted into the Google Sheet
     const values = [
@@ -95,20 +130,25 @@ app.post('/', upload.single('file'), async (req, res) => {
 });
 
 // Function to upload the file to Google Drive and get the URL
-async function uploadToCloudStorage(file) {
+async function uploadToCloudStorage(fileBuffer, fileName, mimeType) {
   const drive = google.drive({ version: 'v3', auth });
 
   try {
+    // Create a readable stream from the file buffer
+    const stream = new Readable();
+    stream.push(fileBuffer);
+    stream.push(null);
+
     // Upload the file to Google Drive
     const res = await drive.files.create({
       requestBody: {
-        name: file.originalname,
-        mimeType: file.mimetype,
+        name: fileName,
+        mimeType: mimeType,
         parents: [FOLDER_ID], // Specify the folder ID
       },
       media: {
-        mimeType: file.mimetype,
-        body: fs.createReadStream(file.path),
+        mimeType: mimeType,
+        body: stream, // Use the readable stream
       },
     });
 
@@ -122,4 +162,7 @@ async function uploadToCloudStorage(file) {
   }
 }
 
-module.exports = app;
+// Start the server without specifying the port
+app.listen(() => {
+  console.log(`Server running`);
+});
