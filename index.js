@@ -9,12 +9,13 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
+const port = process.env.PORT || 3001;
 
 // Middleware to parse JSON bodies
 app.use(bodyParser.json());
 
-// Enable CORS
-const allowedOrigins = ['https://upi-front-bafb2ta7b-shiwanshuanooppandeygmailcoms-projects.vercel.app']; // Add your front-end origin here
+// Enable CORS for a specific origin
+const allowedOrigins = ['https://upi-front-99pla48pc-shiwanshuanooppandeygmailcoms-projects.vercel.app'];
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true);
@@ -27,13 +28,11 @@ app.use(cors({
 }));
 
 // Configure multer for file uploads
-const upload = multer(); // Files will be stored in memory instead of disk
+const upload = multer();
 const { Readable } = require('stream');
 
-// Load Google Sheets API credentials from environment variables
 const { GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY, SPREADSHEET_ID, FOLDER_ID } = process.env;
 
-// Set up JWT auth
 const auth = new google.auth.JWT(
   GOOGLE_CLIENT_EMAIL,
   null,
@@ -41,14 +40,13 @@ const auth = new google.auth.JWT(
   ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
 );
 
-// Create Google Sheets API client
 const sheets = google.sheets({ version: 'v4', auth });
 
 async function getDataFromGoogleSheet() {
   try {
     const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: SPREADSHEET_ID, // Replace with your Google Sheets ID
-      range: 'Sheet1', // Specify the range from which you want to fetch data
+      spreadsheetId: SPREADSHEET_ID,
+      range: 'Sheet1',
     });
 
     const rows = response.data.values;
@@ -86,23 +84,19 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Endpoint to handle form data and send to Google Sheets
 app.post('/', upload.single('file'), async (req, res) => {
   try {
-    const formData = JSON.parse(req.body.formData); // Parse the formData from JSON string
+    const formData = JSON.parse(req.body.formData);
     const file = req.file;
 
-    // Log the file information
     console.log('Uploaded file:', file);
 
-    // Upload the file to cloud storage (e.g., Google Drive) and obtain the URL
     const imageUrl = await uploadToCloudStorage(
-      file.buffer, // Pass file buffer directly
+      file.buffer,
       file.originalname,
       file.mimetype
     );
 
-    // Prepare the data to be inserted into the Google Sheet
     const values = [
       [
         formData.name,
@@ -122,16 +116,14 @@ app.post('/', upload.single('file'), async (req, res) => {
       values,
     };
 
-    // Send data to Google Sheets
     const response = await sheets.spreadsheets.values.append({
-      spreadsheetId: SPREADSHEET_ID, // Replace with your Google Sheets ID
-      range: 'Sheet1!A1', // Ensure this range is correct and corresponds to your sheet
+      spreadsheetId: SPREADSHEET_ID,
+      range: 'Sheet1!A1',
       valueInputOption: 'RAW',
       resource,
     });
     console.log('Response from Sheets API:', response);
 
-    // Send the image URL in the response
     res.status(200).json({ imageUrl });
   } catch (error) {
     console.error('Error sending data to Google Sheets:', error.response?.data || error.message);
@@ -139,30 +131,26 @@ app.post('/', upload.single('file'), async (req, res) => {
   }
 });
 
-// Function to upload the file to Google Drive and get the URL
 async function uploadToCloudStorage(fileBuffer, fileName, mimeType) {
   const drive = google.drive({ version: 'v3', auth });
 
   try {
-    // Create a readable stream from the file buffer
     const stream = new Readable();
     stream.push(fileBuffer);
     stream.push(null);
 
-    // Upload the file to Google Drive
     const res = await drive.files.create({
       requestBody: {
         name: fileName,
         mimeType: mimeType,
-        parents: [FOLDER_ID], // Specify the folder ID
+        parents: [FOLDER_ID],
       },
       media: {
         mimeType: mimeType,
-        body: stream, // Use the readable stream
+        body: stream,
       },
     });
 
-    // Get the URL of the uploaded file
     const fileId = res.data.id;
     const imageUrl = `https://drive.google.com/uc?id=${fileId}`;
     return imageUrl;
@@ -172,7 +160,6 @@ async function uploadToCloudStorage(fileBuffer, fileName, mimeType) {
   }
 }
 
-// Start the server without specifying the port
-app.listen(() => {
-  console.log(`Server running`);
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
