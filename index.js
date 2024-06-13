@@ -15,7 +15,11 @@ const port = process.env.PORT || 3001;
 app.use(bodyParser.json());
 
 // Enable CORS for a specific origin
-const allowedOrigins = ['https://upi-front-99pla48pc-shiwanshuanooppandeygmailcoms-projects.vercel.app'];
+const allowedOrigins = [
+  'https://upi-front-99pla48pc-shiwanshuanooppandeygmailcoms-projects.vercel.app',
+  'http://localhost:3000'
+];
+
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true);
