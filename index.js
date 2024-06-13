@@ -14,7 +14,17 @@ const app = express();
 app.use(bodyParser.json());
 
 // Enable CORS
-app.use(cors());
+const allowedOrigins = ['https://upi-front-bafb2ta7b-shiwanshuanooppandeygmailcoms-projects.vercel.app']; // Add your front-end origin here
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
+}));
 
 // Configure multer for file uploads
 const upload = multer(); // Files will be stored in memory instead of disk
