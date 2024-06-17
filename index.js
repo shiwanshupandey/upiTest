@@ -9,7 +9,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3001;
 
 // Middleware to parse JSON bodies
 app.use(bodyParser.json());
@@ -17,6 +16,8 @@ app.use(bodyParser.json());
 // Enable CORS for a specific origin
 const allowedOrigins = [
   'https://upi-front-99pla48pc-shiwanshuanooppandeygmailcoms-projects.vercel.app',
+  'https://upi-front.vercel.app/page2',
+  'https://upi-front.vercel.app',
   'http://localhost:3000'
 ];
 
@@ -164,6 +165,7 @@ async function uploadToCloudStorage(fileBuffer, fileName, mimeType) {
   }
 }
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// Start the server
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`Server running on port ${process.env.PORT || 3000}`);
 });
