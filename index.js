@@ -95,6 +95,7 @@ app.post('/', upload.single('file'), async (req, res) => {
     const file = req.file;
 
     console.log('Uploaded file:', file);
+    const paymentModeString = formData.paymentMode.join(', ');
 
     const imageUrl = await uploadToCloudStorage(
       file.buffer,
@@ -111,7 +112,8 @@ app.post('/', upload.single('file'), async (req, res) => {
         formData.permanentAddress,
         formData.educationalDetails,
         formData.totalJobExperience,
-        formData.paymentMode,
+        // formData.paymentMode,
+        paymentModeString,
         imageUrl,
         formData.birthdate
       ],
