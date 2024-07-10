@@ -5,7 +5,6 @@ const multer = require('multer');
 const cors = require('cors');
 const fs = require('fs');
 const dotenv = require('dotenv');
-const nodemailer = require('nodemailer');
 
 dotenv.config();
 
@@ -37,7 +36,7 @@ app.use(cors({
 const upload = multer();
 const { Readable } = require('stream');
 
-const { GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY, SPREADSHEET_ID, FOLDER_ID, EMAIL_USER, EMAIL_PASS } = process.env;
+const { GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY, SPREADSHEET_ID, FOLDER_ID } = process.env;
 
 const auth = new google.auth.JWT(
   GOOGLE_CLIENT_EMAIL,
@@ -113,6 +112,7 @@ app.post('/', upload.single('file'), async (req, res) => {
         formData.permanentAddress,
         formData.educationalDetails,
         formData.totalJobExperience,
+        // formData.paymentMode,
         paymentModeString,
         imageUrl,
         formData.birthdate
@@ -130,8 +130,6 @@ app.post('/', upload.single('file'), async (req, res) => {
       resource,
     });
     console.log('Response from Sheets API:', response);
-
-    await sendEmail(formData.email, formData.name, imageUrl);
 
     res.status(200).json({ imageUrl });
   } catch (error) {
@@ -165,45 +163,6 @@ async function uploadToCloudStorage(fileBuffer, fileName, mimeType) {
     return imageUrl;
   } catch (error) {
     console.error('Error uploading file to Google Drive:', error.message);
-    throw error;
-  }
-}
-
-async function sendEmail(recipientEmail, name, imageUrl) {
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.hostinger.com',
-    port: 587, // or 465 if you want to use SSL
-    secure: false, // true for port 465, false for port 587
-    auth: {
-      user: EMAIL_USER,
-      pass: EMAIL_PASS,
-    },
-  });
-
-  const mailOptions = {
-    from: EMAIL_USER,
-    to: recipientEmail,
-    subject: 'Welcome to the "Mastery in Interview Success" Program',
-    html: `
-      <p>Dear ${name},</p>
-      <p>Thank you for registering for the "Mastery in Interview Success" program.</p>
-      <p><strong>When:</strong> Saturday, July 20th</p>
-      <p><strong>Time:</strong> 3:00 PM</p>
-      <p><strong>Duration:</strong> 3 Hours</p>
-      <p><strong>Platform:</strong> Live Online Program on Zoom</p>
-      <p>We appreciate your interest in our program. You won't regret joining us. Our Trainer and Managing Director of OGCS Private Limited, Mr. Baba Ohol, has meticulously prepared the material to deliver valuable knowledge in the simplest language. Get ready for an engaging and insightful session!</p>
-      <p>We will share the training link on your registered WhatsApp number three hours before the program (at 12:00 PM).</p>
-      <p>If you have any questions, comments, or feedback, please email us at <a href="mailto:marketing@ogcs.co.in">marketing@ogcs.co.in</a>.</p>
-      <img src="${imageUrl}" alt="Uploaded Image">
-      <p>Best regards,<br>M/s. OGCS Private Limited</p>
-    `,
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully');
-  } catch (error) {
-    console.error('Error sending email:', error.message);
     throw error;
   }
 }
