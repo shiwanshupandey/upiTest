@@ -70,7 +70,8 @@ async function getDataFromGoogleSheet() {
         totalJobExperience: row[6],
         paymentMode: row[7],
         imageUrl: row[8],
-        birthdate: row[9]
+        birthdate: row[9],
+        UPI: row[10]
       }));
       return data;
     }
@@ -115,7 +116,8 @@ app.post('/', upload.single('file'), async (req, res) => {
         formData.totalJobExperience,
         paymentModeString,
         imageUrl,
-        formData.birthdate
+        formData.birthdate,
+        formData.UPI
       ],
     ];
 
