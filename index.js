@@ -113,7 +113,6 @@ app.post('/', upload.single('file'), async (req, res) => {
         formData.permanentAddress,
         formData.educationalDetails,
         formData.totalJobExperience,
-        // formData.paymentMode,
         paymentModeString,
         imageUrl,
         formData.birthdate
@@ -132,7 +131,7 @@ app.post('/', upload.single('file'), async (req, res) => {
     });
     console.log('Response from Sheets API:', response);
 
-    await sendEmail(formData.email, formData.name);
+    await sendEmail(formData.email, formData.name, imageUrl);
 
     res.status(200).json({ imageUrl });
   } catch (error) {
@@ -170,7 +169,7 @@ async function uploadToCloudStorage(fileBuffer, fileName, mimeType) {
   }
 }
 
-async function sendEmail(recipientEmail, name) {
+async function sendEmail(recipientEmail, name, imageUrl) {
   const transporter = nodemailer.createTransport({
     host: 'smtp.hostinger.com',
     port: 587, // or 465 if you want to use SSL
@@ -195,6 +194,7 @@ async function sendEmail(recipientEmail, name) {
       <p>We appreciate your interest in our program. You won't regret joining us. Our Trainer and Managing Director of OGCS Private Limited, Mr. Baba Ohol, has meticulously prepared the material to deliver valuable knowledge in the simplest language. Get ready for an engaging and insightful session!</p>
       <p>We will share the training link on your registered WhatsApp number three hours before the program (at 12:00 PM).</p>
       <p>If you have any questions, comments, or feedback, please email us at <a href="mailto:marketing@ogcs.co.in">marketing@ogcs.co.in</a>.</p>
+      <img src="${imageUrl}" alt="Uploaded Image">
       <p>Best regards,<br>M/s. OGCS Private Limited</p>
     `,
   };
