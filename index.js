@@ -180,24 +180,31 @@ async function sendEmail(recipientEmail, name, imageUrl) {
     },
   });
 
-  const mailOptions = {
-    from: EMAIL_USER,
-    to: recipientEmail,
-    subject: 'Welcome to the "Mastery in Interview Success" Program',
-    html: `
-      <p>Dear ${name},</p>
-      <p>Thank you for registering for the "Mastery in Interview Success" program.</p>
-      <p><strong>When:</strong> Saturday, July 20th</p>
-      <p><strong>Time:</strong> 3:00 PM</p>
-      <p><strong>Duration:</strong> 3 Hours</p>
-      <p><strong>Platform:</strong> Live Online Program on Zoom</p>
-      <p>We appreciate your interest in our program. You won't regret joining us. Our Trainer and Managing Director of OGCS Private Limited, Mr. Baba Ohol, has meticulously prepared the material to deliver valuable knowledge in the simplest language. Get ready for an engaging and insightful session!</p>
-      <p>We will share the training link on your registered WhatsApp number three hours before the program (at 12:00 PM).</p>
-      <p>If you have any questions, comments, or feedback, please email us at <a href="mailto:marketing@ogcs.co.in">marketing@ogcs.co.in</a>.</p>
-      <img src="${imageUrl}" alt="Uploaded Image">
-      <p>Best regards,<br>M/s. OGCS Private Limited</p>
-    `,
-  };
+const mailOptions = {
+  from: EMAIL_USER,
+  to: recipientEmail,
+  subject: 'Welcome to the "Mastery in Interview Success" Program',
+  html: `
+    <p>Dear ${name},</p>
+    <p>Thank you for registering for the "Mastery in Interview Success" program.</p>
+    <p><strong>When:</strong> Saturday, July 20th</p>
+    <p><strong>Time:</strong> 3:00 PM</p>
+    <p><strong>Duration:</strong> 3 Hours</p>
+    <p><strong>Platform:</strong> Live Online Program on Zoom</p>
+    <p>We appreciate your interest in our program. You won't regret joining us. Our Trainer and Managing Director of OGCS Private Limited, Mr. Baba Ohol, has meticulously prepared the material to deliver valuable knowledge in the simplest language. Get ready for an engaging and insightful session!</p>
+    <p>We will share the training link on your registered WhatsApp number three hours before the program (at 12:00 PM).</p>
+    <p>If you have any questions, comments, or feedback, please email us at <a href="mailto:marketing@ogcs.co.in">marketing@ogcs.co.in</a>.</p>
+    <p>Best regards,<br>M/s. OGCS Private Limited</p>
+  `,
+  attachments: [
+    {
+      filename: 'image.jpg',
+      path: imageUrl,
+      cid: 'unique@nodemailer.com' // same cid value as in the html img src
+    }
+  ]
+};
+
 
   try {
     await transporter.sendMail(mailOptions);
