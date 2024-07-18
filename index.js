@@ -20,7 +20,8 @@ const allowedOrigins = [
   'https://upi-front.vercel.app/page2',
   'https://upi-front.vercel.app/page1',
   'https://upi-front.vercel.app',
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'http://localhost:3000/page1'
 ];
 
 app.use(cors({
