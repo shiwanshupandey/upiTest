@@ -66,14 +66,11 @@ async function getDataFromGoogleSheet() {
         name: row[0],
         mobileNumber: row[1],
         email: row[2],
-        correspondenceAddress: row[3],
-        permanentAddress: row[4],
-        educationalDetails: row[5],
-        totalJobExperience: row[6],
-        paymentMode: row[7],
-        imageUrl: row[8],
-        birthdate: row[9],
-        UPI: row[10]
+        Address: row[3],
+        educationalDetails: row[4],
+        totalJobExperience: row[5],
+        imageUrl: row[6],
+        birthdate: row[7]
       }));
       return data;
     }
@@ -112,14 +109,11 @@ app.post('/', upload.single('file'), async (req, res) => {
         formData.name,
         formData.mobileNumber,
         formData.email,
-        formData.correspondenceAddress,
-        formData.permanentAddress,
+        formData.Address,
         formData.educationalDetails,
         formData.totalJobExperience,
-        paymentModeString,
         imageUrl,
-        formData.birthdate,
-        formData.UPI
+        formData.birthdate
       ],
     ];
 
