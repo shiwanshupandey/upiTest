@@ -18,6 +18,7 @@ app.use(bodyParser.json());
 const allowedOrigins = [
   'https://upi-front-99pla48pc-shiwanshuanooppandeygmailcoms-projects.vercel.app',
   'https://upi-front.vercel.app/page2',
+  'https://upi-front.vercel.app/page1',
   'https://upi-front.vercel.app',
   'http://localhost:3000'
 ];
